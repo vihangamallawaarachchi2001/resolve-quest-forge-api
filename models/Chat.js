@@ -1,4 +1,3 @@
-// models/Chat.js
 
 import mongoose from "mongoose";
 
@@ -7,7 +6,7 @@ const chatSchema = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Ticket',
     required: true,
-    index: true // For fast lookup by ticket
+    index: true 
   },
   messages: [
     {
@@ -45,7 +44,7 @@ const chatSchema = new mongoose.Schema({
   timestamps: true
 });
 
-// Index for performance
+// Index performance
 chatSchema.index({ ticketId: 1 });
 chatSchema.index({ lastUpdated: -1 });
 
