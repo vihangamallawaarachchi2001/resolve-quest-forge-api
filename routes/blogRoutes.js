@@ -90,15 +90,15 @@ router.get('/blogs/:id', async (req, res) => {
   }
 });
 
-// READ ALL BLOGS (with filtering)
+// READ ALL BLOGS 
 router.get('/blogs', async (req, res) => {
   try {
     const { category, title, tags, page = 1, limit = 10 } = req.query;
 
-    // Build filter object
+    
     const filter = {};
 
-    // Category filter (exact match, case-insensitive)
+    
     if (category) {
       filter.category = { $regex: new RegExp(category, 'i') };
     }
