@@ -1,4 +1,4 @@
-// routes/blogRoutes.js
+
 import express from 'express';
 import Blog from '../models/Blog.js';
 
@@ -9,14 +9,14 @@ router.post('/blogs', async (req, res) => {
   try {
     const { title, excerpt, content, category, tags, imageUrl, authorName } = req.body;
 
-    // Validate required fields
+    
     if (!title || !excerpt || !content || !category) {
       return res.status(400).json({
         message: 'Title, excerpt, content, and category are required'
       });
     }
 
-    // Normalize tags to a comma-separated string
+   
     let normalizedTags = '';
     if (Array.isArray(tags)) {
       normalizedTags = tags
@@ -26,7 +26,7 @@ router.post('/blogs', async (req, res) => {
     } else if (typeof tags === 'string') {
       normalizedTags = tags.trim();
     }
-    // If tags is null/undefined/other, normalizedTags remains ''
+    
 
     const blog = new Blog({
       title,
