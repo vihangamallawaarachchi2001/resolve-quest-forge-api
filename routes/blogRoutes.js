@@ -103,29 +103,29 @@ router.get('/blogs', async (req, res) => {
       filter.category = { $regex: new RegExp(category, 'i') };
     }
 
-    // Title filter (partial match)
+    
     if (title) {
       filter.title = { $regex: new RegExp(title, 'i') };
     }
 
-    // Tags filter (comma-separated, partial match for any tag)
+    
     if (tags) {
-      // Split tags by comma and create regex for each
+      
       const tagArray = tags.split(',').map(tag => tag.trim());
       const tagRegexes = tagArray.map(tag => new RegExp(tag, 'i'));
       filter.$or = tagRegexes.map(regex => ({ tags: { $regex: regex } }));
     }
 
-    // Pagination
+    
     const skip = (parseInt(page) - 1) * parseInt(limit);
 
-    // Execute query
+   
     const blogs = await Blog.find(filter)
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(parseInt(limit));
 
-    // Get total count for pagination info
+    
     const total = await Blog.countDocuments(filter);
 
     const formattedBlogs = blogs.map(blog => ({
@@ -162,14 +162,14 @@ router.put('/blogs/:id', async (req, res) => {
   try {
     const { title, excerpt, content, category, tags, imageUrl } = req.body;
 
-    // Validate required fields
+   
     if (title === undefined || excerpt === undefined || content === undefined || category === undefined) {
       return res.status(400).json({
         message: 'Title, excerpt, content, and category are required'
       });
     }
 
-    // Normalize tags to a comma-separated string (if provided)
+  
     let normalizedTags;
     if (tags !== undefined) {
       if (Array.isArray(tags)) {
@@ -180,7 +180,7 @@ router.put('/blogs/:id', async (req, res) => {
       } else if (typeof tags === 'string') {
         normalizedTags = tags.trim();
       } else {
-        // If tags is null, number, etc., treat as empty string
+       
         normalizedTags = '';
       }
     }
@@ -193,12 +193,12 @@ router.put('/blogs/:id', async (req, res) => {
       imageUrl: imageUrl !== undefined ? imageUrl : undefined
     };
 
-    // Only add tags if it was provided in the request
+    
     if (tags !== undefined) {
       updateFields.tags = normalizedTags;
     }
 
-    // Remove undefined fields (optional, but clean)
+    
     Object.keys(updateFields).forEach(key => {
       if (updateFields[key] === undefined) {
         delete updateFields[key];
@@ -227,7 +227,6 @@ router.put('/blogs/:id', async (req, res) => {
         imageUrl: blog.imageUrl,
         createdAt: blog.createdAt,
         updatedAt: blog.updatedAt
-        // Note: your Blog model doesn't have `authorName`, so remove if not needed
       }
     });
   } catch (error) {
