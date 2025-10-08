@@ -1,4 +1,3 @@
-// models/Blog.js
 
 import mongoose from "mongoose";
 
@@ -25,7 +24,7 @@ const blogSchema = new mongoose.Schema({
     lowercase: true
   },
   tags: {
-    type: String, // Comma-separated string as requested
+    type: String,
     default: '',
     trim: true
   },
@@ -34,10 +33,10 @@ const blogSchema = new mongoose.Schema({
     default: ''
   }
 }, {
-  timestamps: true // Automatically adds createdAt and updatedAt
+  timestamps: true
 });
 
-// Index for search optimization
+// Index  optimization
 blogSchema.index({ title: 'text', excerpt: 'text', content: 'text', category: 1, tags: 1 });
 
 export default mongoose.model('Blog', blogSchema);
