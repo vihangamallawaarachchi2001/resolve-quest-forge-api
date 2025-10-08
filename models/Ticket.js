@@ -1,4 +1,4 @@
-// models/Ticket.js
+
 import mongoose from "mongoose";
 
 const ticketSchema = new mongoose.Schema({
@@ -49,10 +49,10 @@ const ticketSchema = new mongoose.Schema({
     lowercase: true
   }
 }, {
-  timestamps: true // Automatically adds createdAt and updatedAt
+  timestamps: true 
 });
 
-// Index for better query performance
+// Index performance
 ticketSchema.index({ status: 1, priority: 1, userId: 1, assignedAgentId: 1 });
 
 export default mongoose.model('Ticket', ticketSchema);
