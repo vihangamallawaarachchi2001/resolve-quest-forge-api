@@ -1,4 +1,3 @@
-// models/Review.js
 
 import mongoose from "mongoose";
 
@@ -27,10 +26,10 @@ const reviewSchema = new mongoose.Schema({
     max: 5
   }
 }, {
-  timestamps: true // Automatically adds createdAt and updatedAt
+  timestamps: true
 });
 
-// Index for search optimization
+// Index optimization
 reviewSchema.index({ username: 1, ticketTitle: 1, ratingNumber: 1 });
 
 export default mongoose.model('Review', reviewSchema);
