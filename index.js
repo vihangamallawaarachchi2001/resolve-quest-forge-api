@@ -24,7 +24,7 @@ app.use('/api', reviewRoutes);
 app.use('/api', ticketRoutes);
 app.use('/api', chatRoutes);
 
-// Basic route
+// health route
 app.get('/', (req, res) => {
   res.json({ message: 'User API is running' });
 });
