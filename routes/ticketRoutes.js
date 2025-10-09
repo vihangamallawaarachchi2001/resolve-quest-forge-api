@@ -1,11 +1,10 @@
-// routes/ticketRoutes.js
+
 import express from 'express';
 import Ticket from '../models/Ticket.js';
 import User from '../models/User.js';
 
 const router = express.Router();
 
-// Helper function to get random agent
 const getRandomAgent = async () => {
   try {
     const agents = await User.find({ role: 'agent' }).select('_id fullname');
@@ -25,14 +24,12 @@ router.post('/tickets', async (req, res) => {
   try {
     const { title, description, priority, userEmail, userName, userId } = req.body;
 
-    // Validate required fields
     if (!title || !description || !priority || !userEmail || !userName || !userId) {
       return res.status(400).json({
         message: 'All fields (title, description, priority, userEmail, userName, userId) are required'
       });
     }
 
-    // Validate priority
     const validPriorities = ['low', 'medium', 'high', 'urgent'];
     if (!validPriorities.includes(priority.toLowerCase())) {
       return res.status(400).json({
@@ -40,7 +37,6 @@ router.post('/tickets', async (req, res) => {
       });
     }
 
-    // Get random agent for assignment
     const randomAgent = await getRandomAgent();
 
     const ticketData = {
@@ -52,7 +48,6 @@ router.post('/tickets', async (req, res) => {
       userId: userId
     };
 
-    // Assign agent if available
     if (randomAgent) {
       ticketData.assignedAgentId = randomAgent._id;
       ticketData.assignedAgentName = randomAgent.fullname;
@@ -115,7 +110,7 @@ router.get('/tickets/:id', async (req, res) => {
   }
 });
 
-// GET ALL TICKETS (with filtering)
+// GET ALL TICKETS
 router.get('/tickets', async (req, res) => {
   try {
     const {
@@ -128,44 +123,35 @@ router.get('/tickets', async (req, res) => {
       limit = 10
     } = req.query;
 
-    // Build filter object
     const filter = {};
 
-    // Status filter
     if (status) {
       filter.status = status.toLowerCase();
     }
 
-    // Priority filter
     if (priority) {
       filter.priority = priority.toLowerCase();
     }
 
-    // User email filter (case-insensitive)
     if (userEmail) {
       filter.userEmail = { $regex: new RegExp(userEmail, 'i') };
     }
 
-    // User ID filter
     if (userId) {
       filter.userId = userId;
     }
 
-    // Assigned agent ID filter
     if (assignedAgentId) {
       filter.assignedAgentId = assignedAgentId;
     }
 
-    // Pagination
     const skip = (parseInt(page) - 1) * parseInt(limit);
 
-    // Execute query
     const tickets = await Ticket.find(filter)
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(parseInt(limit));
 
-    // Get total count for pagination info
     const total = await Ticket.countDocuments(filter);
 
     const formattedTickets = tickets.map(ticket => ({
@@ -214,7 +200,6 @@ router.put('/tickets/:id', async (req, res) => {
       status
     } = req.body;
 
-    // Build update object
     const updateFields = {};
 
     if (title !== undefined) updateFields.title = title.trim();
