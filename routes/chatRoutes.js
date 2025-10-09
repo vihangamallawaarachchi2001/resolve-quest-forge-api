@@ -5,22 +5,19 @@ import User from '../models/User.js';
 
 const router = express.Router();
 
-// GET CHAT FOR A TICKET (or create if doesn't exist)
+// GET CHAT FOR A TICKET
 router.get('/chats/ticket/:ticketId', async (req, res) => {
   try {
     const { ticketId } = req.params;
 
-    // Validate ticket exists
     const ticket = await Ticket.findById(ticketId);
     if (!ticket) {
       return res.status(404).json({ message: 'Ticket not found' });
     }
 
-    // Find or create chat for this ticket
     let chat = await Chat.findOne({ ticketId });
 
     if (!chat) {
-      // Create new chat for this ticket
       chat = new Chat({
         ticketId: ticket._id,
         messages: []
@@ -28,7 +25,6 @@ router.get('/chats/ticket/:ticketId', async (req, res) => {
       await chat.save();
     }
 
-    // Format response - handle MongoDB $oid format
     const formattedMessages = chat.messages.map(msg => ({
       _id: msg._id.toString(),
       senderId: msg.senderId.toString(),
@@ -58,14 +54,12 @@ router.post('/chats/ticket/:ticketId/message', async (req, res) => {
     const { ticketId } = req.params;
     const { senderId, senderName, senderRole, message } = req.body;
 
-    // Validate required fields
     if (!senderId || !senderName || !senderRole || !message) {
       return res.status(400).json({
         message: 'senderId, senderName, senderRole, and message are required'
       });
     }
 
-    // Validate sender role
     const validRoles = ['customer', 'agent', 'admin'];
     if (!validRoles.includes(senderRole)) {
       return res.status(400).json({
@@ -73,13 +67,11 @@ router.post('/chats/ticket/:ticketId/message', async (req, res) => {
       });
     }
 
-    // Validate ticket exists
     const ticket = await Ticket.findById(ticketId);
     if (!ticket) {
       return res.status(404).json({ message: 'Ticket not found' });
     }
 
-    // Find or create chat
     let chat = await Chat.findOne({ ticketId });
 
     if (!chat) {
@@ -89,7 +81,6 @@ router.post('/chats/ticket/:ticketId/message', async (req, res) => {
       });
     }
 
-    // Add new message
     chat.messages.push({
       senderId,
       senderName,
@@ -98,12 +89,10 @@ router.post('/chats/ticket/:ticketId/message', async (req, res) => {
       timestamp: new Date()
     });
 
-    // Update last updated
     chat.lastUpdated = new Date();
 
     await chat.save();
 
-    // Return just the new message for UI update
     const newMessage = chat.messages[chat.messages.length - 1];
 
     res.status(201).json({
@@ -126,25 +115,22 @@ router.post('/chats/ticket/:ticketId/message', async (req, res) => {
   }
 });
 
-// GET NEW MESSAGES SINCE LAST POLL (for polling mechanism)
+// GET NEW MESSAGES SINCE LAST POLL
 router.get('/chats/ticket/:ticketId/new-messages', async (req, res) => {
   try {
     const { ticketId } = req.params;
-    const { lastSeenTimestamp } = req.query; // Client sends their last seen time
+    const { lastSeenTimestamp } = req.query;
 
-    // Validate ticket exists
     const ticket = await Ticket.findById(ticketId);
     if (!ticket) {
       return res.status(404).json({ message: 'Ticket not found' });
     }
 
-    // Find chat
     const chat = await Chat.findOne({ ticketId });
     if (!chat) {
       return res.status(404).json({ message: 'Chat not found for this ticket' });
     }
 
-    // Parse last seen timestamp
     let sinceDate = null;
     if (lastSeenTimestamp) {
       sinceDate = new Date(lastSeenTimestamp);
@@ -153,16 +139,13 @@ router.get('/chats/ticket/:ticketId/new-messages', async (req, res) => {
       }
     }
 
-    // Get new messages
     let newMessages = [];
     if (sinceDate) {
       newMessages = chat.messages.filter(msg => msg.timestamp > sinceDate);
     } else {
-      // If no timestamp provided, return all messages (initial load)
       newMessages = [...chat.messages];
     }
 
-    // Format messages
     const formattedMessages = newMessages.map(msg => ({
       _id: msg._id.toString(),
       senderId: msg.senderId.toString(),
@@ -185,7 +168,7 @@ router.get('/chats/ticket/:ticketId/new-messages', async (req, res) => {
   }
 });
 
-// GET ALL MESSAGES FOR CHAT (alternative to above, for full history)
+// GET ALL MESSAGES FOR CHAT
 router.get('/chats/:chatId/messages', async (req, res) => {
   try {
     const { chatId } = req.params;
@@ -224,48 +207,40 @@ router.put('/chats/ticket/:ticketId/message/:messageId', async (req, res) => {
     const { ticketId, messageId } = req.params;
     const { message, userId } = req.body;
 
-    // Validate required fields
     if (!message) {
       return res.status(400).json({
         message: 'Message content is required'
       });
     }
 
-    // Validate ticket exists
     const ticket = await Ticket.findById(ticketId);
     if (!ticket) {
       return res.status(404).json({ message: 'Ticket not found' });
     }
 
-    // Find chat and message
     const chat = await Chat.findOne({ ticketId });
     if (!chat) {
       return res.status(404).json({ message: 'Chat not found for this ticket' });
     }
 
-    // Find message index
     const messageIndex = chat.messages.findIndex(msg => msg._id.toString() === messageId);
     if (messageIndex === -1) {
       return res.status(404).json({ message: 'Message not found' });
     }
 
-    // Check if user is authorized to edit (must be the sender)
     const token = req.headers.authorization?.split(' ')[1];
     if (!token) {
       return res.status(401).json({ message: 'Unauthorized' });
     }
 
-    // Verify the user is the sender
     if (chat.messages[messageIndex].senderId.toString() !== userId) {
       return res.status(403).json({ message: 'You can only edit your own messages' });
     }
 
-    // Update message
     chat.messages[messageIndex].message = message.trim();
     chat.messages[messageIndex].edited = true;
     chat.messages[messageIndex].editedAt = new Date();
 
-    // Update last updated
     chat.lastUpdated = new Date();
 
     await chat.save();
@@ -293,7 +268,6 @@ router.delete('/chats/ticket/:ticketId/message/:messageId/:userId', async (req, 
   try {
     const { ticketId, messageId, userId } = req.params;
 
-    // Validate ticket exists
     const ticket = await Ticket.findById(ticketId);
     if (!ticket) {
       return res.status(404).json({ message: 'Ticket not found' });
@@ -305,27 +279,22 @@ router.delete('/chats/ticket/:ticketId/message/:messageId/:userId', async (req, 
       return res.status(404).json({ message: 'Chat not found for this ticket' });
     }
 
-    // Find message index
     const messageIndex = chat.messages.findIndex(msg => msg._id.toString() === messageId);
     if (messageIndex === -1) {
       return res.status(404).json({ message: 'Message not found' });
     }
 
-    // Check if user is authorized to delete (must be the sender)
     const token = req.headers.authorization?.split(' ')[1];
     if (!token) {
       return res.status(401).json({ message: 'Unauthorized' });
     }
 
-    // Verify the user is the sender
     if (chat.messages[messageIndex].senderId.toString() !== userId) {
       return res.status(403).json({ message: 'You can only delete your own messages' });
     }
 
-    // Remove message
     chat.messages.splice(messageIndex, 1);
 
-    // Update last updated
     chat.lastUpdated = new Date();
 
     await chat.save();
