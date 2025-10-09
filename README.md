@@ -1,5 +1,3 @@
-
-
 # Backend README
 
 ## Support Ticket System - Backend
@@ -45,20 +43,20 @@ backend/
 │   └── blogRoutes.js   # Blog endpoints
 ├── middleware/         # Custom middleware
 ├── config/             # Configuration files
-└── server.js           # Main application entry
+└── index.js           # Main application entry
 ```
 
 ### 🔧 Installation
 
 1. Clone the repository:
 ```bash
-git clone <repository-url>
-cd support-ticket-backend
+git clone https://github.com/vihangamallawaarachchi2001/resolve-quest-forge-api.git
+cd resolve-quest-forge-api
 ```
 
 2. Install dependencies:
 ```bash
-npm install
+pnpm install
 ```
 
 3. Create environment file:
@@ -75,15 +73,15 @@ JWT_SECRET=your-super-secret-jwt-key
 
 5. Start the server:
 ```bash
-npm run dev
+pnpm run dev
 ```
 
 ### 🚦 Available Scripts
 
-- `npm run dev` - Start development server with auto-restart
-- `npm start` - Start production server
-- `npm run test` - Run tests (if implemented)
-- `npm run lint` - Run ESLint
+- `pnpm run dev` - Start development server with auto-restart
+- `pnpm start` - Start production server
+- `pnpm run test` - Run tests (if implemented)
+- `pnpm run lint` - Run ESLint
 
 ### 🌐 API Endpoints
 
@@ -205,7 +203,7 @@ JWT_SECRET=production-jwt-secret-key
 
 2. Build and run:
 ```bash
-npm start
+pnpm start
 ```
 
 ### 🔧 Configuration
