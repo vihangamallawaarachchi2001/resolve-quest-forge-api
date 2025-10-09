@@ -5,7 +5,6 @@ import User from '../models/User.js'
 
 const router = express.Router();
 
-// Helper function to generate JWT token
 const generateToken = (user) => {
   return jwt.sign(
     { id: user._id, email: user.email, role: user.role },
@@ -14,22 +13,18 @@ const generateToken = (user) => {
   );
 };
 
-// SIGNUP (for both regular signup and admin-created users)
 router.post('/signup', async (req, res) => {
   try {
     const { fullname, email, password, bio, role, avatarUrl } = req.body;
 
-    // Check if user already exists
     const existingUser = await User.findOne({ email });
     if (existingUser) {
       return res.status(400).json({ message: 'User already exists' });
     }
 
-    // Hash password
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(password, salt);
 
-    // Create new user
     const user = new User({
       fullname,
       email,
@@ -41,7 +36,6 @@ router.post('/signup', async (req, res) => {
 
     await user.save();
 
-    // Generate token (only for self-signup)
     const token = generateToken(user);
 
     res.status(201).json({
@@ -69,19 +63,16 @@ router.post('/login', async (req, res) => {
   try {
     const { email, password } = req.body;
 
-    // Find user
     const user = await User.findOne({ email });
     if (!user) {
       return res.status(400).json({ message: 'Invalid credentials' });
     }
 
-    // Check password
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
       return res.status(400).json({ message: 'Invalid credentials' });
     }
 
-    // Generate token
     const token = generateToken(user);
 
     res.json({
@@ -107,8 +98,7 @@ router.post('/login', async (req, res) => {
 // GET PROFILE (current user)
 router.get('/profile', async (req, res) => {
   try {
-    const { email } = req.query; // Get email from query params
-
+    const { email } = req.query;
     if (!email) {
       return res.status(400).json({ message: 'Email is required' });
     }
@@ -205,7 +195,7 @@ router.delete('/profile', async (req, res) => {
 // GET ALL PROFILES
 router.get('/profiles', async (req, res) => {
   try {
-    const users = await User.find().select('-password'); // Exclude password field
+    const users = await User.find().select('-password'); 
 
     const formattedUsers = users.map(user => ({
       id: user._id,
