@@ -1,4 +1,4 @@
-// routes/reviewRoutes.js
+
 import express from 'express';
 import Review from '../models/Review.js';
 
@@ -9,14 +9,12 @@ router.post('/reviews', async (req, res) => {
   try {
     const { username, description, ticketTitle, ratingNumber , ticketId} = req.body;
 
-    // Validate required fields
     if (!username || !description || !ticketTitle || ratingNumber === undefined) {
       return res.status(400).json({
         message: 'Username, description, ticketTitle, and ratingNumber are required'
       });
     }
 
-    // Validate rating range
     if (ratingNumber < 1 || ratingNumber > 5) {
       return res.status(400).json({
         message: 'Rating number must be between 1 and 5'
@@ -101,7 +99,6 @@ router.put('/reviews/:id', async (req, res) => {
   try {
     const { username, description, ticketTitle, ratingNumber } = req.body;
 
-    // Validate required fields
     if (username === undefined || description === undefined ||
         ticketTitle === undefined || ratingNumber === undefined) {
       return res.status(400).json({
@@ -109,7 +106,6 @@ router.put('/reviews/:id', async (req, res) => {
       });
     }
 
-    // Validate rating range
     if (ratingNumber < 1 || ratingNumber > 5) {
       return res.status(400).json({
         message: 'Rating number must be between 1 and 5'
@@ -158,20 +154,16 @@ router.get('/reviews', async (req, res) => {
   try {
     const { username, ticketTitle, ratingNumber, page = 1, limit = 10 } = req.query;
 
-    // Build filter object
     const filter = {};
 
-    // Username filter (partial match, case-insensitive)
     if (username) {
       filter.username = { $regex: new RegExp(username, 'i') };
     }
 
-    // Ticket title filter (partial match, case-insensitive)
     if (ticketTitle) {
       filter.ticketTitle = { $regex: new RegExp(ticketTitle, 'i') };
     }
 
-    // Rating filter (exact match)
     if (ratingNumber) {
       const rating = Number(ratingNumber);
       if (rating >= 1 && rating <= 5) {
@@ -179,16 +171,13 @@ router.get('/reviews', async (req, res) => {
       }
     }
 
-    // Pagination
     const skip = (parseInt(page) - 1) * parseInt(limit);
 
-    // Execute query
     const reviews = await Review.find(filter)
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(parseInt(limit));
 
-    // Get total count for pagination info
     const total = await Review.countDocuments(filter);
 
     const formattedReviews = reviews.map(review => ({
